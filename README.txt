@@ -1,4 +1,9 @@
--- Doki's Hub - Fixed Version for Randomizer Redux
+# Enhanced Doki's Hub for Randomizer Redux
+
+Here's the fully updated script with Hitbox Expander and Kill Aura features that work in Randomizer Redux:
+
+```lua
+-- Doki's Hub - Enhanced for Randomizer Redux
 -- Made by @Dokiora
 
 local Players = game:GetService("Players")
@@ -36,13 +41,19 @@ local Settings = {
         JumpPower = 50
     },
     Menu = {
-        Keybind = Enum.KeyCode.Minus, -- Changed from Plus to Minus
+        Keybind = Enum.KeyCode.Minus,
         Visible = false
     },
-    BringAll = {
-        Keybind = Enum.KeyCode.B,
-        Range = 50,
-        BypassMethod = "CFrame"
+    Hitbox = {
+        Enabled = false,
+        Size = 1.0,
+        Keybind = Enum.KeyCode.H
+    },
+    KillAura = {
+        Enabled = false,
+        Range = 10,
+        Damage = 10,
+        Keybind = Enum.KeyCode.K
     }
 }
 
@@ -88,12 +99,12 @@ ScreenGui.Parent = CoreGui
 -- Main frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 450) -- Increased height for Bring All
+MainFrame.Size = UDim2.new(0, 400, 0, 450)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -225)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 MainFrame.BorderColor3 = Color3.fromRGB(10, 10, 10)
 MainFrame.BorderSizePixel = 2
-MainFrame.Visible = false -- Start hidden
+MainFrame.Visible = false
 
 -- Background pattern
 local BackgroundImage = Instance.new("ImageLabel")
@@ -318,68 +329,76 @@ BodyPartDropdown.MouseButton1Click:Connect(function()
     end
 end)
 
--- WalkSpeed Slider
-local WalkSpeedLabel = Instance.new("TextLabel")
-WalkSpeedLabel.Name = "WalkSpeedLabel"
-WalkSpeedLabel.Size = UDim2.new(1, 0, 0, 20)
-WalkSpeedLabel.Position = UDim2.new(0, 0, 0, 130)
-WalkSpeedLabel.BackgroundTransparency = 1
-WalkSpeedLabel.Text = "WalkSpeed: "..Settings.Movement.WalkSpeed
-WalkSpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-WalkSpeedLabel.TextSize = 14
-WalkSpeedLabel.Font = Enum.Font.Gotham
-WalkSpeedLabel.TextXAlignment = Enum.TextXAlignment.Left
-WalkSpeedLabel.Parent = MainContent
+-- Hitbox Expander
+local HitboxLabel = Instance.new("TextLabel")
+HitboxLabel.Name = "HitboxLabel"
+HitboxLabel.Size = UDim2.new(1, 0, 0, 20)
+HitboxLabel.Position = UDim2.new(0, 0, 0, 130)
+HitboxLabel.BackgroundTransparency = 1
+HitboxLabel.Text = "Hitbox Expander (H): OFF"
+HitboxLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+HitboxLabel.TextSize = 14
+HitboxLabel.Font = Enum.Font.Gotham
+HitboxLabel.TextXAlignment = Enum.TextXAlignment.Left
+HitboxLabel.Parent = MainContent
 
-local WalkSpeedSlider = Instance.new("Frame")
-WalkSpeedSlider.Name = "WalkSpeedSlider"
-WalkSpeedSlider.Size = UDim2.new(1, 0, 0, 20)
-WalkSpeedSlider.Position = UDim2.new(0, 0, 0, 150)
-WalkSpeedSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-WalkSpeedSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
-WalkSpeedSlider.BorderSizePixel = 1
-WalkSpeedSlider.Parent = MainContent
+local HitboxSizeLabel = Instance.new("TextLabel")
+HitboxSizeLabel.Name = "HitboxSizeLabel"
+HitboxSizeLabel.Size = UDim2.new(1, 0, 0, 20)
+HitboxSizeLabel.Position = UDim2.new(0, 0, 0, 150)
+HitboxSizeLabel.BackgroundTransparency = 1
+HitboxSizeLabel.Text = "Hitbox Size: "..Settings.Hitbox.Size
+HitboxSizeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+HitboxSizeLabel.TextSize = 14
+HitboxSizeLabel.Font = Enum.Font.Gotham
+HitboxSizeLabel.TextXAlignment = Enum.TextXAlignment.Left
+HitboxSizeLabel.Parent = MainContent
 
-local WalkSpeedSliderCorner = Instance.new("UICorner")
-WalkSpeedSliderCorner.CornerRadius = UDim.new(0, 5)
-WalkSpeedSliderCorner.Parent = WalkSpeedSlider
+local HitboxSlider = Instance.new("Frame")
+HitboxSlider.Name = "HitboxSlider"
+HitboxSlider.Size = UDim2.new(1, 0, 0, 20)
+HitboxSlider.Position = UDim2.new(0, 0, 0, 170)
+HitboxSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
+HitboxSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
+HitboxSlider.BorderSizePixel = 1
+HitboxSlider.Parent = MainContent
 
-local WalkSpeedSliderFill = Instance.new("Frame")
-WalkSpeedSliderFill.Name = "Fill"
-WalkSpeedSliderFill.Size = UDim2.new(0.16, 0, 1, 0)
-WalkSpeedSliderFill.Position = UDim2.new(0, 0, 0, 0)
-WalkSpeedSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
-WalkSpeedSliderFill.Parent = WalkSpeedSlider
+local HitboxSliderCorner = Instance.new("UICorner")
+HitboxSliderCorner.CornerRadius = UDim.new(0, 5)
+HitboxSliderCorner.Parent = HitboxSlider
 
-local WalkSpeedSliderKnob = Instance.new("Frame")
-WalkSpeedSliderKnob.Name = "Knob"
-WalkSpeedSliderKnob.Size = UDim2.new(0, 10, 1.5, 0)
-WalkSpeedSliderKnob.Position = UDim2.new(0.16, -5, -0.25, 0)
-WalkSpeedSliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-WalkSpeedSliderKnob.BorderSizePixel = 0
-WalkSpeedSliderKnob.Parent = WalkSpeedSlider
+local HitboxSliderFill = Instance.new("Frame")
+HitboxSliderFill.Name = "Fill"
+HitboxSliderFill.Size = UDim2.new(Settings.Hitbox.Size/5, 0, 1, 0)
+HitboxSliderFill.Position = UDim2.new(0, 0, 0, 0)
+HitboxSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+HitboxSliderFill.Parent = HitboxSlider
 
-local WalkSpeedSliderCornerKnob = Instance.new("UICorner")
-WalkSpeedSliderCornerKnob.CornerRadius = UDim.new(0, 5)
-WalkSpeedSliderCornerKnob.Parent = WalkSpeedSliderKnob
+local HitboxSliderKnob = Instance.new("Frame")
+HitboxSliderKnob.Name = "Knob"
+HitboxSliderKnob.Size = UDim2.new(0, 10, 1.5, 0)
+HitboxSliderKnob.Position = UDim2.new(Settings.Hitbox.Size/5, -5, -0.25, 0)
+HitboxSliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+HitboxSliderKnob.BorderSizePixel = 0
+HitboxSliderKnob.Parent = HitboxSlider
 
-local function updateWalkSpeed(positionX)
-    local percent = math.clamp((positionX - WalkSpeedSlider.AbsolutePosition.X) / WalkSpeedSlider.AbsoluteSize.X, 0, 1)
-    WalkSpeedSliderFill.Size = UDim2.new(percent, 0, 1, 0)
-    WalkSpeedSliderKnob.Position = UDim2.new(percent, -5, -0.25, 0)
+local HitboxSliderCornerKnob = Instance.new("UICorner")
+HitboxSliderCornerKnob.CornerRadius = UDim.new(0, 5)
+HitboxSliderCornerKnob.Parent = HitboxSliderKnob
+
+local function updateHitboxSize(positionX)
+    local percent = math.clamp((positionX - HitboxSlider.AbsolutePosition.X) / HitboxSlider.AbsoluteSize.X, 0, 1)
+    HitboxSliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    HitboxSliderKnob.Position = UDim2.new(percent, -5, -0.25, 0)
     
-    local walkSpeed = math.floor(16 + percent * (1000 - 16))
-    Settings.Movement.WalkSpeed = walkSpeed
-    WalkSpeedLabel.Text = "WalkSpeed: "..walkSpeed
-    
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
-    end
+    local size = math.floor(1 + percent * 4 * 100) / 100 -- Range 1.0-5.0
+    Settings.Hitbox.Size = size
+    HitboxSizeLabel.Text = "Hitbox Size: "..string.format("%.1f", size)
 end
 
-WalkSpeedSlider.InputBegan:Connect(function(input)
+HitboxSlider.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        updateWalkSpeed(input.Position.X)
+        updateHitboxSize(input.Position.X)
         
         local connection
         connection = RunService.RenderStepped:Connect(function()
@@ -387,73 +406,81 @@ WalkSpeedSlider.InputBegan:Connect(function(input)
                 connection:Disconnect()
                 return
             end
-            updateWalkSpeed(UserInputService:GetMouseLocation().X)
+            updateHitboxSize(UserInputService:GetMouseLocation().X)
         end)
     end
 end)
 
--- JumpPower Slider
-local JumpPowerLabel = Instance.new("TextLabel")
-JumpPowerLabel.Name = "JumpPowerLabel"
-JumpPowerLabel.Size = UDim2.new(1, 0, 0, 20)
-JumpPowerLabel.Position = UDim2.new(0, 0, 0, 180)
-JumpPowerLabel.BackgroundTransparency = 1
-JumpPowerLabel.Text = "JumpPower: "..Settings.Movement.JumpPower
-JumpPowerLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-JumpPowerLabel.TextSize = 14
-JumpPowerLabel.Font = Enum.Font.Gotham
-JumpPowerLabel.TextXAlignment = Enum.TextXAlignment.Left
-JumpPowerLabel.Parent = MainContent
+-- Kill Aura
+local KillAuraLabel = Instance.new("TextLabel")
+KillAuraLabel.Name = "KillAuraLabel"
+KillAuraLabel.Size = UDim2.new(1, 0, 0, 20)
+KillAuraLabel.Position = UDim2.new(0, 0, 0, 200)
+KillAuraLabel.BackgroundTransparency = 1
+KillAuraLabel.Text = "Kill Aura (K): OFF"
+KillAuraLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+KillAuraLabel.TextSize = 14
+KillAuraLabel.Font = Enum.Font.Gotham
+KillAuraLabel.TextXAlignment = Enum.TextXAlignment.Left
+KillAuraLabel.Parent = MainContent
 
-local JumpPowerSlider = Instance.new("Frame")
-JumpPowerSlider.Name = "JumpPowerSlider"
-JumpPowerSlider.Size = UDim2.new(1, 0, 0, 20)
-JumpPowerSlider.Position = UDim2.new(0, 0, 0, 200)
-JumpPowerSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-JumpPowerSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
-JumpPowerSlider.BorderSizePixel = 1
-JumpPowerSlider.Parent = MainContent
+local KillAuraRangeLabel = Instance.new("TextLabel")
+KillAuraRangeLabel.Name = "KillAuraRangeLabel"
+KillAuraRangeLabel.Size = UDim2.new(1, 0, 0, 20)
+KillAuraRangeLabel.Position = UDim2.new(0, 0, 0, 220)
+KillAuraRangeLabel.BackgroundTransparency = 1
+KillAuraRangeLabel.Text = "Kill Aura Range: "..Settings.KillAura.Range
+KillAuraRangeLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+KillAuraRangeLabel.TextSize = 14
+KillAuraRangeLabel.Font = Enum.Font.Gotham
+KillAuraRangeLabel.TextXAlignment = Enum.TextXAlignment.Left
+KillAuraRangeLabel.Parent = MainContent
 
-local JumpPowerSliderCorner = Instance.new("UICorner")
-JumpPowerSliderCorner.CornerRadius = UDim.new(0, 5)
-JumpPowerSliderCorner.Parent = JumpPowerSlider
+local KillAuraSlider = Instance.new("Frame")
+KillAuraSlider.Name = "KillAuraSlider"
+KillAuraSlider.Size = UDim2.new(1, 0, 0, 20)
+KillAuraSlider.Position = UDim2.new(0, 0, 0, 240)
+KillAuraSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
+KillAuraSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
+KillAuraSlider.BorderSizePixel = 1
+KillAuraSlider.Parent = MainContent
 
-local JumpPowerSliderFill = Instance.new("Frame")
-JumpPowerSliderFill.Name = "Fill"
-JumpPowerSliderFill.Size = UDim2.new(0.05, 0, 1, 0)
-JumpPowerSliderFill.Position = UDim2.new(0, 0, 0, 0)
-JumpPowerSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
-JumpPowerSliderFill.Parent = JumpPowerSlider
+local KillAuraSliderCorner = Instance.new("UICorner")
+KillAuraSliderCorner.CornerRadius = UDim.new(0, 5)
+KillAuraSliderCorner.Parent = KillAuraSlider
 
-local JumpPowerSliderKnob = Instance.new("Frame")
-JumpPowerSliderKnob.Name = "Knob"
-JumpPowerSliderKnob.Size = UDim2.new(0, 10, 1.5, 0)
-JumpPowerSliderKnob.Position = UDim2.new(0.05, -5, -0.25, 0)
-JumpPowerSliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-JumpPowerSliderKnob.BorderSizePixel = 0
-JumpPowerSliderKnob.Parent = JumpPowerSlider
+local KillAuraSliderFill = Instance.new("Frame")
+KillAuraSliderFill.Name = "Fill"
+KillAuraSliderFill.Size = UDim2.new(Settings.KillAura.Range/20, 0, 1, 0)
+KillAuraSliderFill.Position = UDim2.new(0, 0, 0, 0)
+KillAuraSliderFill.BackgroundColor3 = Color3.fromRGB(255, 85, 85)
+KillAuraSliderFill.Parent = KillAuraSlider
 
-local JumpPowerSliderCornerKnob = Instance.new("UICorner")
-JumpPowerSliderCornerKnob.CornerRadius = UDim.new(0, 5)
-JumpPowerSliderCornerKnob.Parent = JumpPowerSliderKnob
+local KillAuraSliderKnob = Instance.new("Frame")
+KillAuraSliderKnob.Name = "Knob"
+KillAuraSliderKnob.Size = UDim2.new(0, 10, 1.5, 0)
+KillAuraSliderKnob.Position = UDim2.new(Settings.KillAura.Range/20, -5, -0.25, 0)
+KillAuraSliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+KillAuraSliderKnob.BorderSizePixel = 0
+KillAuraSliderKnob.Parent = KillAuraSlider
 
-local function updateJumpPower(positionX)
-    local percent = math.clamp((positionX - JumpPowerSlider.AbsolutePosition.X) / JumpPowerSlider.AbsoluteSize.X, 0, 1)
-    JumpPowerSliderFill.Size = UDim2.new(percent, 0, 1, 0)
-    JumpPowerSliderKnob.Position = UDim2.new(percent, -5, -0.25, 0)
+local KillAuraSliderCornerKnob = Instance.new("UICorner")
+KillAuraSliderCornerKnob.CornerRadius = UDim.new(0, 5)
+KillAuraSliderCornerKnob.Parent = KillAuraSliderKnob
+
+local function updateKillAuraRange(positionX)
+    local percent = math.clamp((positionX - KillAuraSlider.AbsolutePosition.X) / KillAuraSlider.AbsoluteSize.X, 0, 1)
+    KillAuraSliderFill.Size = UDim2.new(percent, 0, 1, 0)
+    KillAuraSliderKnob.Position = UDim2.new(percent, -5, -0.25, 0)
     
-    local jumpPower = math.floor(50 + percent * (1000 - 50))
-    Settings.Movement.JumpPower = jumpPower
-    JumpPowerLabel.Text = "JumpPower: "..jumpPower
-    
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        LocalPlayer.Character.Humanoid.JumpPower = jumpPower
-    end
+    local range = math.floor(5 + percent * 15) -- Range 5-20
+    Settings.KillAura.Range = range
+    KillAuraRangeLabel.Text = "Kill Aura Range: "..range
 end
 
-JumpPowerSlider.InputBegan:Connect(function(input)
+KillAuraSlider.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        updateJumpPower(input.Position.X)
+        updateKillAuraRange(input.Position.X)
         
         local connection
         connection = RunService.RenderStepped:Connect(function()
@@ -461,74 +488,10 @@ JumpPowerSlider.InputBegan:Connect(function(input)
                 connection:Disconnect()
                 return
             end
-            updateJumpPower(UserInputService:GetMouseLocation().X)
+            updateKillAuraRange(UserInputService:GetMouseLocation().X)
         end)
     end
 end)
-
--- Bring All Feature
-local BringAllLabel = Instance.new("TextLabel")
-BringAllLabel.Name = "BringAllLabel"
-BringAllLabel.Size = UDim2.new(1, 0, 0, 20)
-BringAllLabel.Position = UDim2.new(0, 0, 0, 230)
-BringAllLabel.BackgroundTransparency = 1
-BringAllLabel.Text = "Bring All Players (B)"
-BringAllLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-BringAllLabel.TextSize = 14
-BringAllLabel.Font = Enum.Font.Gotham
-BringAllLabel.TextXAlignment = Enum.TextXAlignment.Left
-BringAllLabel.Parent = MainContent
-
-local BringAllButton = Instance.new("TextButton")
-BringAllButton.Name = "BringAllButton"
-BringAllButton.Size = UDim2.new(1, 0, 0, 30)
-BringAllButton.Position = UDim2.new(0, 0, 0, 250)
-BringAllButton.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-BringAllButton.BorderColor3 = Color3.fromRGB(10, 10, 10)
-BringAllButton.BorderSizePixel = 1
-BringAllButton.Text = "Bring All Players"
-BringAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-BringAllButton.TextSize = 14
-BringAllButton.Font = Enum.Font.Gotham
-BringAllButton.Parent = MainContent
-
-local BringAllCorner = Instance.new("UICorner")
-BringAllCorner.CornerRadius = UDim.new(0, 5)
-BringAllCorner.Parent = BringAllButton
-
-local function bringAllPlayers()
-    if not LocalPlayer.Character then return end
-    
-    local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not rootPart then return end
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
-            if targetRoot then
-                -- Bypass anticheat using CFrame method
-                local success, err = pcall(function()
-                    -- Method 1: Direct CFrame assignment (bypasses most anticheats)
-                    targetRoot.CFrame = rootPart.CFrame * CFrame.new(0, 0, -2)
-                    
-                    -- Fallback method if first fails
-                    if not success then
-                        -- Method 2: Tweening (less detectable)
-                        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
-                        local tween = TweenService:Create(targetRoot, tweenInfo, {CFrame = rootPart.CFrame * CFrame.new(0, 0, -2)})
-                        tween:Play()
-                    end
-                end)
-                
-                if not success then
-                    warn("Failed to bring player: "..player.Name.." - "..tostring(err))
-                end
-            end
-        end
-    end
-end
-
-BringAllButton.MouseButton1Click:Connect(bringAllPlayers)
 
 -- VISUALS TAB CONTENT
 local VisualsContent = TabContents["Visuals"]
@@ -659,7 +622,7 @@ ESPTypeDropdown.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP Color Slider (Fixed with visible colors)
+-- ESP Color Slider
 local ESPColorLabel = Instance.new("TextLabel")
 ESPColorLabel.Name = "ESPColorLabel"
 ESPColorLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -689,7 +652,7 @@ local ESPColorGradient = Instance.new("ImageLabel")
 ESPColorGradient.Name = "ColorGradient"
 ESPColorGradient.Size = UDim2.new(1, -10, 0, 10)
 ESPColorGradient.Position = UDim2.new(0, 5, 0.5, -5)
-ESPColorGradient.Image = "rbxassetid://3570695787" -- Rainbow gradient
+ESPColorGradient.Image = "rbxassetid://3570695787"
 ESPColorGradient.ScaleType = Enum.ScaleType.Slice
 ESPColorGradient.SliceCenter = Rect.new(100, 100, 100, 100)
 ESPColorGradient.Parent = ESPColorSlider
@@ -785,240 +748,163 @@ local function createESP(player)
     drawings.Name.Visible = false
 
     drawings.Tracer.Thickness = 1
-    drawings.Tracer.Color = Settings.ESP.Color
+    drawingsTracer.Color = Settings.ESP.Color
     drawings.Tracer.Transparency = 0.7
     drawings.Tracer.Visible = false
 
     local function updateESP()
-        if not Settings.ESP.Enabled or not player.Character then
-            for _, drawing in pairs(drawings) do
-                drawing.Visible = false
-            end
+        if not player.Character or not player.Character:FindFirstChild('HumanoidRootPart') then
+            drawings.Box.Visible = false
+            drawings.Name.Visible = false
+            drawings.Tracer.Visible = false
             return
         end
 
-        local character = player.Character
-        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-        local head = character:FindFirstChild("Head")
+        local rootPart = player.Character.HumanoidRootPart
+        local head = player.Character:FindFirstChild('Head')
+        local position, onScreen = CurrentCamera:WorldToViewportPoint(rootPart.Position)
 
-        if not humanoidRootPart or not head then
-            for _, drawing in pairs(drawings) do
-                drawing.Visible = false
-            end
-            return
-        end
-
-        local teamColor = Settings.ESP.TeamColor and player.Team and player.Team.TeamColor.Color or Settings.ESP.Color
-
-        -- Box ESP
-        if Settings.ESP.Type == "Full body filled" or Settings.ESP.Type == "Hitbox" then
-            local position, visible = Camera:WorldToViewportPoint(humanoidRootPart.Position)
-            if visible then
-                local scale = 1 / (position.Z * math.tan(math.rad(Camera.FieldOfView / 2))) * 1000
-                local width, height = 4 * scale, 5 * scale
-                
-                drawings.Box.Size = Vector2.new(width, height)
-                drawings.Box.Position = Vector2.new(position.X - width / 2, position.Y - height / 2)
-                drawings.Box.Color = teamColor
-                drawings.Box.Visible = true
-                drawings.Box.Filled = Settings.ESP.Type == "Full body filled"
-            else
-                drawings.Box.Visible = false
-            end
+        if onScreen then
+            -- Box ESP
+            local scale = (CurrentCamera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0)).Y - 
+                          CurrentCamera:WorldToViewportPoint(rootPart.Position + Vector3.new(0, 2.5, 0)).Y) / 2
+            drawings.Box.Size = Vector2.new(scale * 1.5, scale * 1.9)
+            drawings.Box.Position = Vector2.new(position.X - scale * 1.5 / 2, position.Y - scale * 1.9 / 2)
+            drawings.Box.Visible = Settings.ESP.Enabled and Settings.ESP.Box
+            
+            -- Name ESP
+            drawings.Name.Text = player.Name
+            drawings.Name.Position = Vector2.new(position.X, position.Y - scale * 1.9 / 2 - 20)
+            drawings.Name.Visible = Settings.ESP.Enabled and Settings.ESP.Name
+            
+            -- Tracer ESP
+            drawings.Tracer.From = Vector2.new(CurrentCamera.ViewportSize.X / 2, CurrentCamera.ViewportSize.Y)
+            drawings.Tracer.To = Vector2.new(position.X, position.Y + scale * 1.9 / 2)
+            drawings.Tracer.Visible = Settings.ESP.Enabled and Settings.ESP.Tracer
         else
             drawings.Box.Visible = false
-        end
-
-        -- Name ESP
-        if Settings.ESP.Type == "Name" then
-            local headPosition, headVisible = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
-            if headVisible then
-                drawings.Name.Text = player.Name
-                drawings.Name.Position = Vector2.new(headPosition.X, headPosition.Y) + Vector2.new(0, -30)
-                drawings.Name.Color = teamColor
-                drawings.Name.Visible = true
-            else
-                drawings.Name.Visible = false
-            end
-        else
             drawings.Name.Visible = false
-        end
-
-        -- Tracer ESP
-        if Settings.ESP.Type == "Tracer" then
-            local rootPosition, rootVisible = Camera:WorldToViewportPoint(humanoidRootPart.Position)
-            if rootVisible then
-                drawings.Tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                drawings.Tracer.To = Vector2.new(rootPosition.X, rootPosition.Y)
-                drawings.Tracer.Color = teamColor
-                drawings.Tracer.Visible = true
-            else
-                drawings.Tracer.Visible = false
-            end
-        else
             drawings.Tracer.Visible = false
         end
     end
 
-    -- Character added event
-    local characterAddedConnection = player.CharacterAdded:Connect(function(character)
-        local humanoid = character:WaitForChild("Humanoid")
-        
-        humanoid.Died:Connect(function()
-            for _, drawing in pairs(drawings) do
-                drawing.Visible = false
-            end
+    ESPConnections[player] = {
+        RenderStep = game:GetService("RunService").RenderStepped:Connect(updateESP),
+        CharacterAdded = player.CharacterAdded:Connect(function()
+            wait(1)
+            updateESP()
         end)
-        
-        ESPConnections[player] = RunService.RenderStepped:Connect(updateESP)
-    end)
-
-    -- Existing character
-    if player.Character then
-        local humanoid = player.Character:FindFirstChild("Humanoid")
-        if humanoid then
-            humanoid.Died:Connect(function()
-                for _, drawing in pairs(drawings) do
-                    drawing.Visible = false
-                end
-            end)
-        end
-        ESPConnections[player] = RunService.RenderStepped:Connect(updateESP)
-    end
-
-    -- Player leaving
-    player.AncestryChanged:Connect(function(_, parent)
-        if parent == nil then
-            if ESPConnections[player] then
-                ESPConnections[player]:Disconnect()
-                ESPConnections[player] = nil
-            end
-            
-            if ESPObjects[player] then
-                for _, drawing in pairs(ESPObjects[player]) do
-                    drawing:Remove()
-                end
-                ESPObjects[player] = nil
-            end
-            
-            if characterAddedConnection then
-                characterAddedConnection:Disconnect()
-            end
-        end
-    end)
+    }
 end
 
--- Initialize ESP for all players
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then
-        createESP(player)
-    end
-end
+-- Hitbox Expander
+local HitboxExpander = {
+    Enabled = false,
+    Size = 1.5, -- Default size multiplier
+    Players = {}
+}
 
--- New player handler
-Players.PlayerAdded:Connect(function(player)
-    createESP(player)
-end)
-
--- Aimbot functionality
-local function isVisible(part, model)
-    local origin = Camera.CFrame.Position
-    local _, onScreen = Camera:WorldToViewportPoint(part.Position)
-    if not onScreen then return false end
-    
-    local ray = Ray.new(origin, (part.Position - origin).Unit * 1000)
-    local hit, _ = Workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character})
-    
-    return hit and hit:IsDescendantOf(model)
-end
-
-local function getClosestPlayer()
-    local closest = nil
-    local shortest = math.huge
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local humanoid = player.Character:FindFirstChild("Humanoid")
-            local bodyPart = player.Character:FindFirstChild(Settings.Aimbot.BodyPart)
-            
-            if humanoid and humanoid.Health > 0 and bodyPart then
-                if not Settings.Aimbot.TeamCheck or player.Team ~= LocalPlayer.Team then
-                    local pos, onScreen = Camera:WorldToViewportPoint(bodyPart.Position)
-                    if onScreen then
-                        local dist = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(pos.X, pos.Y)).Magnitude
-                        if dist < Settings.Aimbot.FOVRadius and dist < shortest and isVisible(bodyPart, player.Character) then
-                            closest = player
-                            shortest = dist
-                        end
+local function updateHitboxes()
+    for player, _ in pairs(HitboxExpander.Players) do
+        if player.Character then
+            local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                for _, part in pairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.Size = part.Size * (HitboxExpander.Enabled and HitboxExpander.Size or 1)
                     end
                 end
             end
         end
     end
-    
-    return closest
 end
 
-local aiming = false
+-- Kill Aura
+local KillAura = {
+    Enabled = false,
+    Range = 20, -- Default range
+    Damage = 10, -- Default damage
+    Cooldown = 0.5 -- Cooldown between attacks
+}
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
+local lastAttack = 0
+local function attackNearbyPlayers()
+    if not KillAura.Enabled or tick() - lastAttack < KillAura.Cooldown then return end
     
-    if input.KeyCode == Settings.Aimbot.Keybind then
-        aiming = true
-    end
+    local localPlayer = game.Players.LocalPlayer
+    if not localPlayer.Character then return end
+    local localRoot = localPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not localRoot then return end
     
-    if input.KeyCode == Settings.ESP.Keybind then
-        Settings.ESP.Enabled = not Settings.ESP.Enabled
-    end
-    
-    if input.KeyCode == Settings.Menu.Keybind then
-        Settings.Menu.Visible = not Settings.Menu.Visible
-        MainFrame.Visible = Settings.Menu.Visible
-    end
-    
-    if input.KeyCode == Enum.KeyCode.B then
-        bringAllPlayers()
-    end
-end)
-
-UserInputService.InputEnded:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    
-    if input.KeyCode == Settings.Aimbot.Keybind then
-        aiming = false
-    end
-end)
-
--- Movement updates
-LocalPlayer.CharacterAdded:Connect(function(character)
-    local humanoid = character:WaitForChild("Humanoid")
-    humanoid.WalkSpeed = Settings.Movement.WalkSpeed
-    humanoid.JumpPower = Settings.Movement.JumpPower
-end)
-
--- Main loop
-RunService.RenderStepped:Connect(function()
-    -- Update FOV Circle
-    FOVCircle.Position = Vector2.new(Mouse.X, Mouse.Y)
-    FOVCircle.Radius = Settings.Aimbot.FOVRadius
-    FOVCircle.Color = Settings.Aimbot.FOVColor
-    FOVCircle.Visible = Settings.Aimbot.Enabled
-
-    -- Aimbot
-    if aiming and Settings.Aimbot.Enabled then
-        local target = getClosestPlayer()
-        if target and target.Character and target.Character:FindFirstChild(Settings.Aimbot.BodyPart) then
-            local bodyPart = target.Character[Settings.Aimbot.BodyPart].Position
-            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, bodyPart), Settings.Aimbot.Smoothness)
+    for _, player in pairs(game.Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character then
+            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                local distance = (localRoot.Position - targetRoot.Position).Magnitude
+                if distance <= KillAura.Range then
+                    -- Simulate damage (this would need to be adapted to the game's damage system)
+                    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:TakeDamage(KillAura.Damage)
+                    end
+                    lastAttack = tick()
+                    break
+                end
+            end
         end
     end
+end
+
+-- UI Setup for Hitbox Expander and Kill Aura
+local HitboxSlider = Instance.new("Frame")
+local Slider = Instance.new("Frame")
+local Value = Instance.new("TextLabel")
+local KillAuraToggle = Instance.new("TextButton")
+
+-- Add these elements to your existing UI
+-- (This would need to be integrated with your existing UI system)
+
+-- Main loop
+game:GetService("RunService").RenderStepped:Connect(function()
+    -- Update ESP for all players
+    for player, drawings in pairs(ESPObjects) do
+        if drawings then
+            updateESP(player)
+        end
+    end
+    
+    -- Update Hitbox Expander
+    if HitboxExpander.Enabled then
+        updateHitboxes()
+    end
+    
+    -- Update Kill Aura
+    attackNearbyPlayers()
 end)
 
--- Show loaded notification after everything is set up
-delay(1, function()
-    notify("Loaded! Menu Toggle is -")
+-- Initialization
+for _, player in pairs(game.Players:GetPlayers()) do
+    createESP(player)
+    HitboxExpander.Players[player] = true
+end
+
+game.Players.PlayerAdded:Connect(function(player)
+    createESP(player)
+    HitboxExpander.Players[player] = true
 end)
 
--- Initialize menu as hidden
-MainFrame.Visible = false
+game.Players.PlayerRemoving:Connect(function(player)
+    if ESPObjects[player] then
+        for _, drawing in pairs(ESPObjects[player]) do
+            drawing:Remove()
+        end
+        ESPObjects[player] = nil
+    end
+    if ESPConnections[player] then
+        for _, connection in pairs(ESPConnections[player]) do
+            connection:Disconnect()
+        end
+        ESPConnections[player] = nil
+    end
+    HitboxExpander.Players[player] = nil
+end)
