@@ -1,4 +1,4 @@
--- Doki's Hub - Enhanced ESP & Aimbot UI
+-- Doki's Hub - Final Enhanced Version
 -- Made by @Dokiora
 
 local Players = game:GetService("Players")
@@ -33,13 +33,49 @@ local Settings = {
     Movement = {
         WalkSpeed = 16,
         JumpPower = 50
+    },
+    Menu = {
+        Keybind = Enum.KeyCode.Plus,
+        Visible = false
     }
 }
 
--- Create main UI
+-- Show loading notification
+local function notify(message)
+    local notification = Instance.new("TextLabel")
+    notification.Name = "Notification"
+    notification.Size = UDim2.new(0, 200, 0, 40)
+    notification.Position = UDim2.new(0.5, -100, 1, -100)
+    notification.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    notification.BackgroundTransparency = 0.3
+    notification.BorderColor3 = Color3.fromRGB(10, 10, 10) -- Blacker outer lines
+    notification.BorderSizePixel = 2
+    notification.Text = message
+    notification.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+    notification.TextSize = 14
+    notification.Font = Enum.Font.Gotham
+    notification.Parent = CoreGui
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = notification
+    
+    local tweenIn = TweenService:Create(notification, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 1, -60)})
+    tweenIn:Play()
+    
+    delay(3, function()
+        local tweenOut = TweenService:Create(notification, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 1, -100)})
+        tweenOut:Play()
+        tweenOut.Completed:Wait()
+        notification:Destroy()
+    end)
+end
+
+notify("Loading...")
+
+-- Create main UI (but don't parent it yet)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DokisHubUI"
-ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 
 -- Main frame
@@ -48,8 +84,10 @@ MainFrame.Name = "MainFrame"
 MainFrame.Size = UDim2.new(0, 400, 0, 400)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -200)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.BorderColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.BorderColor3 = Color3.fromRGB(10, 10, 10) -- Blackest color
 MainFrame.BorderSizePixel = 2
+MainFrame.Active = false
+MainFrame.Selectable = false
 
 -- Background pattern
 local BackgroundImage = Instance.new("ImageLabel")
@@ -88,7 +126,7 @@ local function createTabButton(name, index)
     button.Size = UDim2.new(0.3, -10, 0, 30)
     button.Position = UDim2.new((index-1)*0.3 + 0.05, 0, 0, 40)
     button.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-    button.BorderColor3 = Color3.fromRGB(20, 20, 20)
+    button.BorderColor3 = Color3.fromRGB(10, 10, 10) -- Blackest color
     button.BorderSizePixel = 2
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -166,7 +204,7 @@ AimbotKeybindButton.Name = "AimbotKeybindButton"
 AimbotKeybindButton.Size = UDim2.new(1, 0, 0, 30)
 AimbotKeybindButton.Position = UDim2.new(0, 0, 0, 30)
 AimbotKeybindButton.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-AimbotKeybindButton.BorderColor3 = Color3.fromRGB(20, 20, 20)
+AimbotKeybindButton.BorderColor3 = Color3.fromRGB(10, 10, 10)
 AimbotKeybindButton.BorderSizePixel = 1
 AimbotKeybindButton.Text = "Key: " .. tostring(Settings.Aimbot.Keybind)
 AimbotKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -215,7 +253,7 @@ BodyPartDropdown.Name = "BodyPartDropdown"
 BodyPartDropdown.Size = UDim2.new(1, 0, 0, 30)
 BodyPartDropdown.Position = UDim2.new(0, 0, 0, 90)
 BodyPartDropdown.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-BodyPartDropdown.BorderColor3 = Color3.fromRGB(20, 20, 20)
+BodyPartDropdown.BorderColor3 = Color3.fromRGB(10, 10, 10)
 BodyPartDropdown.BorderSizePixel = 1
 BodyPartDropdown.Text = "Head"
 BodyPartDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -245,7 +283,7 @@ BodyPartDropdown.MouseButton1Click:Connect(function()
     BodyPartMenuFrame.Size = UDim2.new(1, 0, 0, #BodyPartOptions * 30)
     BodyPartMenuFrame.Position = UDim2.new(0, 0, 0, 30)
     BodyPartMenuFrame.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-    BodyPartMenuFrame.BorderColor3 = Color3.fromRGB(20, 20, 20)
+    BodyPartMenuFrame.BorderColor3 = Color3.fromRGB(10, 10, 10)
     BodyPartMenuFrame.BorderSizePixel = 1
     BodyPartMenuFrame.Parent = BodyPartDropdown
     
@@ -292,7 +330,7 @@ WalkSpeedSlider.Name = "WalkSpeedSlider"
 WalkSpeedSlider.Size = UDim2.new(1, 0, 0, 20)
 WalkSpeedSlider.Position = UDim2.new(0, 0, 0, 150)
 WalkSpeedSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-WalkSpeedSlider.BorderColor3 = Color3.fromRGB(20, 20, 20)
+WalkSpeedSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
 WalkSpeedSlider.BorderSizePixel = 1
 WalkSpeedSlider.Parent = MainContent
 
@@ -366,7 +404,7 @@ JumpPowerSlider.Name = "JumpPowerSlider"
 JumpPowerSlider.Size = UDim2.new(1, 0, 0, 20)
 JumpPowerSlider.Position = UDim2.new(0, 0, 0, 200)
 JumpPowerSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-JumpPowerSlider.BorderColor3 = Color3.fromRGB(20, 20, 20)
+JumpPowerSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
 JumpPowerSlider.BorderSizePixel = 1
 JumpPowerSlider.Parent = MainContent
 
@@ -443,7 +481,7 @@ ESPKeybindButton.Name = "ESPKeybindButton"
 ESPKeybindButton.Size = UDim2.new(1, 0, 0, 30)
 ESPKeybindButton.Position = UDim2.new(0, 0, 0, 30)
 ESPKeybindButton.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-ESPKeybindButton.BorderColor3 = Color3.fromRGB(20, 20, 20)
+ESPKeybindButton.BorderColor3 = Color3.fromRGB(10, 10, 10)
 ESPKeybindButton.BorderSizePixel = 1
 ESPKeybindButton.Text = "Key: " .. tostring(Settings.ESP.Keybind)
 ESPKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -492,7 +530,7 @@ ESPTypeDropdown.Name = "ESPTypeDropdown"
 ESPTypeDropdown.Size = UDim2.new(1, 0, 0, 30)
 ESPTypeDropdown.Position = UDim2.new(0, 0, 0, 90)
 ESPTypeDropdown.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-ESPTypeDropdown.BorderColor3 = Color3.fromRGB(20, 20, 20)
+ESPTypeDropdown.BorderColor3 = Color3.fromRGB(10, 10, 10)
 ESPTypeDropdown.BorderSizePixel = 1
 ESPTypeDropdown.Text = "Full body filled"
 ESPTypeDropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -522,7 +560,7 @@ ESPTypeDropdown.MouseButton1Click:Connect(function()
     ESPTypeMenuFrame.Size = UDim2.new(1, 0, 0, #ESPTypeOptions * 30)
     ESPTypeMenuFrame.Position = UDim2.new(0, 0, 0, 30)
     ESPTypeMenuFrame.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-    ESPTypeMenuFrame.BorderColor3 = Color3.fromRGB(20, 20, 20)
+    ESPTypeMenuFrame.BorderColor3 = Color3.fromRGB(10, 10, 10)
     ESPTypeMenuFrame.BorderSizePixel = 1
     ESPTypeMenuFrame.Parent = ESPTypeDropdown
     
@@ -551,7 +589,7 @@ ESPTypeDropdown.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP Color Slider
+-- ESP Color Slider (Enhanced with visible colors)
 local ESPColorLabel = Instance.new("TextLabel")
 ESPColorLabel.Name = "ESPColorLabel"
 ESPColorLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -569,7 +607,7 @@ ESPColorSlider.Name = "ESPColorSlider"
 ESPColorSlider.Size = UDim2.new(1, 0, 0, 30)
 ESPColorSlider.Position = UDim2.new(0, 0, 0, 150)
 ESPColorSlider.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-ESPColorSlider.BorderColor3 = Color3.fromRGB(20, 20, 20)
+ESPColorSlider.BorderColor3 = Color3.fromRGB(10, 10, 10)
 ESPColorSlider.BorderSizePixel = 1
 ESPColorSlider.Parent = VisualsContent
 
@@ -577,49 +615,49 @@ local ESPColorSliderCorner = Instance.new("UICorner")
 ESPColorSliderCorner.CornerRadius = UDim.new(0, 5)
 ESPColorSliderCorner.Parent = ESPColorSlider
 
-local ESPColorSliderImage = Instance.new("ImageButton")
-ESPColorSliderImage.Name = "ColorSlider"
-ESPColorSliderImage.Size = UDim2.new(1, -10, 0, 10)
-ESPColorSliderImage.Position = UDim2.new(0, 5, 0.5, -5)
-ESPColorSliderImage.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ESPColorSliderImage.Image = "rbxassetid://3570695787" -- Rainbow gradient
-ESPColorSliderImage.ScaleType = Enum.ScaleType.Slice
-ESPColorSliderImage.SliceCenter = Rect.new(100, 100, 100, 100)
-ESPColorSliderImage.Parent = ESPColorSlider
+-- Rainbow gradient with visible colors
+local ESPColorGradient = Instance.new("ImageLabel")
+ESPColorGradient.Name = "ColorGradient"
+ESPColorGradient.Size = UDim2.new(1, -10, 0, 10)
+ESPColorGradient.Position = UDim2.new(0, 5, 0.5, -5)
+ESPColorGradient.Image = "rbxassetid://3570695787" -- Rainbow gradient
+ESPColorGradient.ScaleType = Enum.ScaleType.Slice
+ESPColorGradient.SliceCenter = Rect.new(100, 100, 100, 100)
+ESPColorGradient.Parent = ESPColorSlider
 
-local ESPColorSliderKnob = Instance.new("Frame")
-ESPColorSliderKnob.Name = "Knob"
-ESPColorSliderKnob.Size = UDim2.new(0, 15, 0, 15)
-ESPColorSliderKnob.Position = UDim2.new(0, -7.5, 0.5, -7.5)
-ESPColorSliderKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-ESPColorSliderKnob.BorderSizePixel = 0
-ESPColorSliderKnob.Parent = ESPColorSlider
+local ESPColorKnob = Instance.new("Frame")
+ESPColorKnob.Name = "Knob"
+ESPColorKnob.Size = UDim2.new(0, 15, 0, 15)
+ESPColorKnob.Position = UDim2.new(0, -7.5, 0.5, -7.5)
+ESPColorKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ESPColorKnob.BorderSizePixel = 0
+ESPColorKnob.Parent = ESPColorSlider
 
-local ESPColorSliderKnobCorner = Instance.new("UICorner")
-ESPColorSliderKnobCorner.CornerRadius = UDim.new(0.5, 0)
-ESPColorSliderKnobCorner.Parent = ESPColorSliderKnob
+local ESPColorKnobCorner = Instance.new("UICorner")
+ESPColorKnobCorner.CornerRadius = UDim.new(0.5, 0)
+ESPColorKnobCorner.Parent = ESPColorKnob
 
 local function updateESPColor(positionX)
-    local percent = math.clamp((positionX - ESPColorSliderImage.AbsolutePosition.X) / ESPColorSliderImage.AbsoluteSize.X, 0, 1)
-    ESPColorSliderKnob.Position = UDim2.new(percent, -7.5, 0.5, -7.5)
+    local percent = math.clamp((positionX - ESPColorGradient.AbsolutePosition.X) / ESPColorGradient.AbsoluteSize.X, 0, 1)
+    ESPColorKnob.Position = UDim2.new(percent, -7.5, 0.5, -7.5)
     
     local hue = percent * 360
     Settings.ESP.Color = Color3.fromHSV(hue/360, 1, 1)
 end
 
-ESPColorSliderImage.MouseButton1Down:Connect(function(x, y)
-    local mouseLocation = UserInputService:GetMouseLocation()
-    updateESPColor(mouseLocation.X)
-    
-    local connection
-    connection = RunService.RenderStepped:Connect(function()
-        if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-            connection:Disconnect()
-            return
-        end
-        local newMouseLocation = UserInputService:GetMouseLocation()
-        updateESPColor(newMouseLocation.X)
-    end)
+ESPColorGradient.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        updateESPColor(input.Position.X)
+        
+        local connection
+        connection = RunService.RenderStepped:Connect(function()
+            if not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+                connection:Disconnect()
+                return
+            end
+            updateESPColor(UserInputService:GetMouseLocation().X)
+        end)
+    end
 end)
 
 -- MISC TAB CONTENT
@@ -637,7 +675,6 @@ CreditLabel.Parent = MiscContent
 
 -- Show main tab by default
 showTab("Main")
-MainFrame.Parent = ScreenGui
 
 -- FOV Circle
 local FOVCircle = Drawing.new("Circle")
@@ -864,6 +901,15 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if input.KeyCode == Settings.ESP.Keybind then
         Settings.ESP.Enabled = not Settings.ESP.Enabled
     end
+    
+    if input.KeyCode == Settings.Menu.Keybind then
+        Settings.Menu.Visible = not Settings.Menu.Visible
+        if Settings.Menu.Visible then
+            ScreenGui.Parent = CoreGui
+        else
+            ScreenGui.Parent = nil
+        end
+    end
 end)
 
 UserInputService.InputEnded:Connect(function(input, gameProcessed)
@@ -899,66 +945,10 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- UI Drag functionality
-local dragging = false
-local dragInput, dragStart, startPos
-
-MainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
+-- Show loaded notification after everything is set up
+delay(1, function()
+    notify("Loaded! Menu Toggle is +")
 end)
 
-MainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement then
-        dragInput = input
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- Initial notification
-local function notify(message)
-    local notification = Instance.new("TextLabel")
-    notification.Name = "Notification"
-    notification.Size = UDim2.new(0, 200, 0, 40)
-    notification.Position = UDim2.new(0.5, -100, 1, -100)
-    notification.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    notification.BackgroundTransparency = 0.5
-    notification.BorderColor3 = Color3.fromRGB(40, 40, 40)
-    notification.BorderSizePixel = 2
-    notification.Text = message
-    notification.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
-    notification.TextSize = 14
-    notification.Font = Enum.Font.Gotham
-    notification.Parent = ScreenGui
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = notification
-    
-    local tweenIn = TweenService:Create(notification, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 1, -60)})
-    tweenIn:Play()
-    
-    delay(3, function()
-        local tweenOut = TweenService:Create(notification, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 1, -100)})
-        tweenOut:Play()
-        tweenOut.Completed:Wait()
-        notification:Destroy()
-    end)
-end
-
-notify("Doki's Hub loaded successfully!")
+-- Initialize menu as hidden
+ScreenGui.Parent = nil
