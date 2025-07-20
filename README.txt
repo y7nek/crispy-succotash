@@ -1,4 +1,4 @@
--- Doki's Hub - Final Enhanced Version
+-- Doki's Hub - Fixed Version for Randomizer Redux
 -- Made by @Dokiora
 
 local Players = game:GetService("Players")
@@ -6,11 +6,12 @@ local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
+local Workspace = game:GetService("Workspace")
 
 -- Player references
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
-local Camera = workspace.CurrentCamera
+local Camera = Workspace.CurrentCamera
 
 -- Settings
 local Settings = {
@@ -35,12 +36,17 @@ local Settings = {
         JumpPower = 50
     },
     Menu = {
-        Keybind = Enum.KeyCode.Plus,
+        Keybind = Enum.KeyCode.Minus, -- Changed from Plus to Minus
         Visible = false
+    },
+    BringAll = {
+        Keybind = Enum.KeyCode.B,
+        Range = 50,
+        BypassMethod = "CFrame"
     }
 }
 
--- Show loading notification
+-- Show notification function
 local function notify(message)
     local notification = Instance.new("TextLabel")
     notification.Name = "Notification"
@@ -48,10 +54,10 @@ local function notify(message)
     notification.Position = UDim2.new(0.5, -100, 1, -100)
     notification.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     notification.BackgroundTransparency = 0.3
-    notification.BorderColor3 = Color3.fromRGB(10, 10, 10) -- Blacker outer lines
+    notification.BorderColor3 = Color3.fromRGB(10, 10, 10)
     notification.BorderSizePixel = 2
     notification.Text = message
-    notification.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+    notification.TextColor3 = Color3.fromRGB(255, 165, 0)
     notification.TextSize = 14
     notification.Font = Enum.Font.Gotham
     notification.Parent = CoreGui
@@ -71,23 +77,23 @@ local function notify(message)
     end)
 end
 
-notify("Loading...")
+notify("Loading Doki's Hub...")
 
--- Create main UI (but don't parent it yet)
+-- Create main UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DokisHubUI"
 ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = CoreGui
 
 -- Main frame
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 400, 0, 400)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 400, 0, 450) -- Increased height for Bring All
+MainFrame.Position = UDim2.new(0.5, -200, 0.5, -225)
 MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-MainFrame.BorderColor3 = Color3.fromRGB(10, 10, 10) -- Blackest color
+MainFrame.BorderColor3 = Color3.fromRGB(10, 10, 10)
 MainFrame.BorderSizePixel = 2
-MainFrame.Active = false
-MainFrame.Selectable = false
+MainFrame.Visible = false -- Start hidden
 
 -- Background pattern
 local BackgroundImage = Instance.new("ImageLabel")
@@ -111,7 +117,7 @@ Title.Size = UDim2.new(1, 0, 0, 40)
 Title.Position = UDim2.new(0, 0, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "Doki's Hub"
-Title.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+Title.TextColor3 = Color3.fromRGB(255, 165, 0)
 Title.TextSize = 20
 Title.Font = Enum.Font.GothamBold
 Title.Parent = MainFrame
@@ -126,7 +132,7 @@ local function createTabButton(name, index)
     button.Size = UDim2.new(0.3, -10, 0, 30)
     button.Position = UDim2.new((index-1)*0.3 + 0.05, 0, 0, 40)
     button.BackgroundColor3 = Color3.fromHex("#3D3D3D")
-    button.BorderColor3 = Color3.fromRGB(10, 10, 10) -- Blackest color
+    button.BorderColor3 = Color3.fromRGB(10, 10, 10)
     button.BorderSizePixel = 2
     button.Text = name
     button.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -135,7 +141,7 @@ local function createTabButton(name, index)
     button.Parent = MainFrame
     
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(1, 0) -- Pill shape
+    corner.CornerRadius = UDim.new(1, 0)
     corner.Parent = button
     
     TabButtons[name] = button
@@ -206,7 +212,7 @@ AimbotKeybindButton.Position = UDim2.new(0, 0, 0, 30)
 AimbotKeybindButton.BackgroundColor3 = Color3.fromHex("#3D3D3D")
 AimbotKeybindButton.BorderColor3 = Color3.fromRGB(10, 10, 10)
 AimbotKeybindButton.BorderSizePixel = 1
-AimbotKeybindButton.Text = "Key: " .. tostring(Settings.Aimbot.Keybind)
+AimbotKeybindButton.Text = "Key: "..tostring(Settings.Aimbot.Keybind)
 AimbotKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 AimbotKeybindButton.TextSize = 14
 AimbotKeybindButton.Font = Enum.Font.Gotham
@@ -228,7 +234,7 @@ AimbotKeybindButton.MouseButton1Click:Connect(function()
         
         if input.UserInputType == Enum.UserInputType.Keyboard then
             Settings.Aimbot.Keybind = input.KeyCode
-            AimbotKeybindButton.Text = "Key: " .. tostring(input.KeyCode)
+            AimbotKeybindButton.Text = "Key: "..tostring(input.KeyCode)
             listeningForAimbotKeybind = false
             connection:Disconnect()
         end
@@ -318,7 +324,7 @@ WalkSpeedLabel.Name = "WalkSpeedLabel"
 WalkSpeedLabel.Size = UDim2.new(1, 0, 0, 20)
 WalkSpeedLabel.Position = UDim2.new(0, 0, 0, 130)
 WalkSpeedLabel.BackgroundTransparency = 1
-WalkSpeedLabel.Text = "WalkSpeed: " .. Settings.Movement.WalkSpeed
+WalkSpeedLabel.Text = "WalkSpeed: "..Settings.Movement.WalkSpeed
 WalkSpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 WalkSpeedLabel.TextSize = 14
 WalkSpeedLabel.Font = Enum.Font.Gotham
@@ -342,7 +348,7 @@ local WalkSpeedSliderFill = Instance.new("Frame")
 WalkSpeedSliderFill.Name = "Fill"
 WalkSpeedSliderFill.Size = UDim2.new(0.16, 0, 1, 0)
 WalkSpeedSliderFill.Position = UDim2.new(0, 0, 0, 0)
-WalkSpeedSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+WalkSpeedSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
 WalkSpeedSliderFill.Parent = WalkSpeedSlider
 
 local WalkSpeedSliderKnob = Instance.new("Frame")
@@ -364,7 +370,7 @@ local function updateWalkSpeed(positionX)
     
     local walkSpeed = math.floor(16 + percent * (1000 - 16))
     Settings.Movement.WalkSpeed = walkSpeed
-    WalkSpeedLabel.Text = "WalkSpeed: " .. walkSpeed
+    WalkSpeedLabel.Text = "WalkSpeed: "..walkSpeed
     
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = walkSpeed
@@ -392,7 +398,7 @@ JumpPowerLabel.Name = "JumpPowerLabel"
 JumpPowerLabel.Size = UDim2.new(1, 0, 0, 20)
 JumpPowerLabel.Position = UDim2.new(0, 0, 0, 180)
 JumpPowerLabel.BackgroundTransparency = 1
-JumpPowerLabel.Text = "JumpPower: " .. Settings.Movement.JumpPower
+JumpPowerLabel.Text = "JumpPower: "..Settings.Movement.JumpPower
 JumpPowerLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 JumpPowerLabel.TextSize = 14
 JumpPowerLabel.Font = Enum.Font.Gotham
@@ -416,7 +422,7 @@ local JumpPowerSliderFill = Instance.new("Frame")
 JumpPowerSliderFill.Name = "Fill"
 JumpPowerSliderFill.Size = UDim2.new(0.05, 0, 1, 0)
 JumpPowerSliderFill.Position = UDim2.new(0, 0, 0, 0)
-JumpPowerSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+JumpPowerSliderFill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
 JumpPowerSliderFill.Parent = JumpPowerSlider
 
 local JumpPowerSliderKnob = Instance.new("Frame")
@@ -438,7 +444,7 @@ local function updateJumpPower(positionX)
     
     local jumpPower = math.floor(50 + percent * (1000 - 50))
     Settings.Movement.JumpPower = jumpPower
-    JumpPowerLabel.Text = "JumpPower: " .. jumpPower
+    JumpPowerLabel.Text = "JumpPower: "..jumpPower
     
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.JumpPower = jumpPower
@@ -459,6 +465,70 @@ JumpPowerSlider.InputBegan:Connect(function(input)
         end)
     end
 end)
+
+-- Bring All Feature
+local BringAllLabel = Instance.new("TextLabel")
+BringAllLabel.Name = "BringAllLabel"
+BringAllLabel.Size = UDim2.new(1, 0, 0, 20)
+BringAllLabel.Position = UDim2.new(0, 0, 0, 230)
+BringAllLabel.BackgroundTransparency = 1
+BringAllLabel.Text = "Bring All Players (B)"
+BringAllLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+BringAllLabel.TextSize = 14
+BringAllLabel.Font = Enum.Font.Gotham
+BringAllLabel.TextXAlignment = Enum.TextXAlignment.Left
+BringAllLabel.Parent = MainContent
+
+local BringAllButton = Instance.new("TextButton")
+BringAllButton.Name = "BringAllButton"
+BringAllButton.Size = UDim2.new(1, 0, 0, 30)
+BringAllButton.Position = UDim2.new(0, 0, 0, 250)
+BringAllButton.BackgroundColor3 = Color3.fromHex("#3D3D3D")
+BringAllButton.BorderColor3 = Color3.fromRGB(10, 10, 10)
+BringAllButton.BorderSizePixel = 1
+BringAllButton.Text = "Bring All Players"
+BringAllButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+BringAllButton.TextSize = 14
+BringAllButton.Font = Enum.Font.Gotham
+BringAllButton.Parent = MainContent
+
+local BringAllCorner = Instance.new("UICorner")
+BringAllCorner.CornerRadius = UDim.new(0, 5)
+BringAllCorner.Parent = BringAllButton
+
+local function bringAllPlayers()
+    if not LocalPlayer.Character then return end
+    
+    local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local targetRoot = player.Character:FindFirstChild("HumanoidRootPart")
+            if targetRoot then
+                -- Bypass anticheat using CFrame method
+                local success, err = pcall(function()
+                    -- Method 1: Direct CFrame assignment (bypasses most anticheats)
+                    targetRoot.CFrame = rootPart.CFrame * CFrame.new(0, 0, -2)
+                    
+                    -- Fallback method if first fails
+                    if not success then
+                        -- Method 2: Tweening (less detectable)
+                        local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear)
+                        local tween = TweenService:Create(targetRoot, tweenInfo, {CFrame = rootPart.CFrame * CFrame.new(0, 0, -2)})
+                        tween:Play()
+                    end
+                end)
+                
+                if not success then
+                    warn("Failed to bring player: "..player.Name.." - "..tostring(err))
+                end
+            end
+        end
+    end
+end
+
+BringAllButton.MouseButton1Click:Connect(bringAllPlayers)
 
 -- VISUALS TAB CONTENT
 local VisualsContent = TabContents["Visuals"]
@@ -483,7 +553,7 @@ ESPKeybindButton.Position = UDim2.new(0, 0, 0, 30)
 ESPKeybindButton.BackgroundColor3 = Color3.fromHex("#3D3D3D")
 ESPKeybindButton.BorderColor3 = Color3.fromRGB(10, 10, 10)
 ESPKeybindButton.BorderSizePixel = 1
-ESPKeybindButton.Text = "Key: " .. tostring(Settings.ESP.Keybind)
+ESPKeybindButton.Text = "Key: "..tostring(Settings.ESP.Keybind)
 ESPKeybindButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 ESPKeybindButton.TextSize = 14
 ESPKeybindButton.Font = Enum.Font.Gotham
@@ -505,7 +575,7 @@ ESPKeybindButton.MouseButton1Click:Connect(function()
         
         if input.UserInputType == Enum.UserInputType.Keyboard then
             Settings.ESP.Keybind = input.KeyCode
-            ESPKeybindButton.Text = "Key: " .. tostring(input.KeyCode)
+            ESPKeybindButton.Text = "Key: "..tostring(input.KeyCode)
             listeningForESPKeybind = false
             connection:Disconnect()
         end
@@ -589,7 +659,7 @@ ESPTypeDropdown.MouseButton1Click:Connect(function()
     end
 end)
 
--- ESP Color Slider (Enhanced with visible colors)
+-- ESP Color Slider (Fixed with visible colors)
 local ESPColorLabel = Instance.new("TextLabel")
 ESPColorLabel.Name = "ESPColorLabel"
 ESPColorLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -615,7 +685,6 @@ local ESPColorSliderCorner = Instance.new("UICorner")
 ESPColorSliderCorner.CornerRadius = UDim.new(0, 5)
 ESPColorSliderCorner.Parent = ESPColorSlider
 
--- Rainbow gradient with visible colors
 local ESPColorGradient = Instance.new("ImageLabel")
 ESPColorGradient.Name = "ColorGradient"
 ESPColorGradient.Size = UDim2.new(1, -10, 0, 10)
@@ -668,13 +737,14 @@ CreditLabel.Name = "CreditLabel"
 CreditLabel.Size = UDim2.new(1, 0, 1, 0)
 CreditLabel.BackgroundTransparency = 1
 CreditLabel.Text = "Made by @Dokiora"
-CreditLabel.TextColor3 = Color3.fromRGB(255, 165, 0) -- Orange
+CreditLabel.TextColor3 = Color3.fromRGB(255, 165, 0)
 CreditLabel.TextSize = 16
 CreditLabel.Font = Enum.Font.GothamBold
 CreditLabel.Parent = MiscContent
 
 -- Show main tab by default
 showTab("Main")
+MainFrame.Parent = ScreenGui
 
 -- FOV Circle
 local FOVCircle = Drawing.new("Circle")
@@ -857,7 +927,7 @@ local function isVisible(part, model)
     if not onScreen then return false end
     
     local ray = Ray.new(origin, (part.Position - origin).Unit * 1000)
-    local hit, _ = workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character})
+    local hit, _ = Workspace:FindPartOnRayWithIgnoreList(ray, {LocalPlayer.Character})
     
     return hit and hit:IsDescendantOf(model)
 end
@@ -904,11 +974,11 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     
     if input.KeyCode == Settings.Menu.Keybind then
         Settings.Menu.Visible = not Settings.Menu.Visible
-        if Settings.Menu.Visible then
-            ScreenGui.Parent = CoreGui
-        else
-            ScreenGui.Parent = nil
-        end
+        MainFrame.Visible = Settings.Menu.Visible
+    end
+    
+    if input.KeyCode == Enum.KeyCode.B then
+        bringAllPlayers()
     end
 end)
 
@@ -947,8 +1017,8 @@ end)
 
 -- Show loaded notification after everything is set up
 delay(1, function()
-    notify("Loaded! Menu Toggle is +")
+    notify("Loaded! Menu Toggle is -")
 end)
 
 -- Initialize menu as hidden
-ScreenGui.Parent = nil
+MainFrame.Visible = false
